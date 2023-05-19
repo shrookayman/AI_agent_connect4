@@ -5,12 +5,12 @@ import random
 import pygame
 import sys
 import math
-sky= (191, 193, 244)
+
 white=(250, 250, 250)
 black=(0, 0, 0)
 red=(200, 0, 0)
 blue=(0, 0, 155)
-yellow=(237, 241, 0)
+yellow=(254, 233, 115)
 rowCnt = 6
 columnCnt = 7
 computer = 0
@@ -20,7 +20,12 @@ computer_PIECE = 1
 AI_PIECE = 2
 windowLen = 4
 screenSize = 100
-screenWidth=750
+screenWidth=700
+screenHeight=700
+background_image = pygame.image.load("./images/ps2.png")
+background_image = pygame.transform.scale(background_image, (screenWidth, screenHeight))
+
+screen = pygame.display.set_mode((screenWidth, screenHeight))
 
 
 font = "Montserrat-Bold.ttf"
@@ -205,7 +210,9 @@ def getValidLocation(board):
         if locationValid(board, col):
             valid_locations.append(col)
     return valid_locations
+
 def draw_board(board):
+
     for c in range(columnCnt):
         for r in range(rowCnt):
             pygame.draw.rect(screen, yellow, (c * screenSize, r * screenSize + screenSize, screenSize, screenSize))
@@ -220,12 +227,13 @@ def draw_board(board):
             elif board[r][c] == AI_PIECE:
                 pygame.draw.circle(screen, blue, (
                 int(c * screenSize + screenSize / 2), height - int(r * screenSize + screenSize / 2)), RADIUS)
-    pygame.display.update()
+    pygame.display.flip()
 
 def chooseMinimax(depth):
         global event
         game_over = False
-        turn = AI  # 1
+        turn = computer  # 1
+        screen.fill(white)
         while not game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -250,17 +258,18 @@ def chooseMinimax(depth):
                     row = nextRow(board, col)
                     dropChecker(board, row, col, AI_PIECE)
                     if moveWin(board, AI_PIECE):
-                        label = myFont.render(" Agent Wins!!", True, blue)
+                        label = myFont.render(" Agent Wins", True, blue)
                         screen.blit(label, (40, 10))
                         game_over = True
                     printBoard(board)
                     draw_board(board)
                     turn = computer
             if game_over:
-                pygame.time.wait(6000)
+                pygame.time.wait(5000)
 def chooseAlphabeta(depth):
         game_over = False
         turn = AI
+        screen.fill(white)
         while not game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -272,7 +281,7 @@ def chooseAlphabeta(depth):
                     row = nextRow(board, col)
                     dropChecker(board, row, col, computer_PIECE)
                     if moveWin(board, computer_PIECE):
-                        label = myFont.render("computer wins!!", True, red)
+                        label = myFont.render("computer wins", True, red)
                         screen.blit(label, (40, 10))
                         game_over = True
                     turn = AI
@@ -284,14 +293,14 @@ def chooseAlphabeta(depth):
                     row = nextRow(board, col)
                     dropChecker(board, row, col, AI_PIECE)
                     if moveWin(board, AI_PIECE):
-                        label = myFont.render("Agent Wins", True, blue)
+                        label = myFont.render(" Agent Wins", True, blue)
                         screen.blit(label, (40, 10))
                         game_over = True
                     printBoard(board)
                     draw_board(board)
                     turn = computer
             if game_over:
-                pygame.time.wait(6000)
+                pygame.time.wait(5000)
 
 
 board = createBoard()
@@ -306,7 +315,7 @@ draw_board(board)
 pygame.display.update()
 
 myFont = pygame.font.SysFont("connect 4", 75)
-# os.environ['SDL_VIDEO_CENTERED']= '1'
+
 
 clock = pygame.time.Clock()
 
@@ -336,7 +345,7 @@ def connect4(setAlgorithm):
             if self.hovered:
                 return red
             else:
-                return blue
+                return white
         def set_rect(self):
             self.set_rend()
             self.rect = self.rend.get_rect()
@@ -359,13 +368,15 @@ def connect4(setAlgorithm):
     level2Rect = level2.get_rect()
     level3Rect = level3.get_rect()
 
+
     options = [
-        Option("MINIMAX", (screenWidth/4 - (minRect[2]/4), 330)),
-        Option("ALPHA-BETA", (screenWidth / 4 - (alphabetaRect[2] / 4), 400)),
-        Option("Exit", (screenWidth/4 - (exitRect[2]/4), 470)),
-        Option("Easy", (3 * screenWidth / 4 - (level1Rect[2] / 4), 330)),
-        Option("Medium", (3 * screenWidth / 4 - (level2Rect[2] / 4), 400)),
-        Option("Hard", (3 * screenWidth / 4 - (level3Rect[2] / 4), 470))
+        Option("MINIMAX", (screenWidth/4 - (minRect[2]/4), 410)),
+        Option("ALPHA-BETA", (screenWidth / 4 - (alphabetaRect[2] / 4), 480)),
+        Option("Exit", (screenWidth/4 - (exitRect[2]/4), 550)),
+        Option("Easy", (3 * screenWidth / 4 - (level1Rect[2] / 4), 410)),
+        Option("Medium", (3 * screenWidth / 4 - (level2Rect[2] / 4), 480)),
+        Option("Hard", (3 * screenWidth / 4 - (level3Rect[2] / 4), 550))
+
     ]
 
     pygame.display.update()
@@ -373,7 +384,8 @@ def connect4(setAlgorithm):
 
     while True:
         pygame.event.pump()
-        screen.fill(white)
+
+        screen.blit(background_image, (0, 0))
         for option in options :
             if option.rect.collidepoint(pygame.mouse.get_pos()):
                 option.hovered = True
@@ -381,14 +393,11 @@ def connect4(setAlgorithm):
                     if event.type == pygame.MOUSEBUTTONDOWN and option.text == "ALPHA-BETA":
                          setAlgorithm = "ALPHA BETA"
                          print(setAlgorithm)
-
                     if event.type == pygame.MOUSEBUTTONDOWN and option.text == "MINIMAX":
                         setAlgorithm = "MINIMAX"
                         print(setAlgorithm)
-
                     if event.type == pygame.MOUSEBUTTONDOWN and option.text == "Easy" and setAlgorithm =="ALPHA BETA":
                         chooseAlphabeta(2)
-                        # print(option.text)
                         connect4(setAlgorithm)
                     elif event.type == pygame.MOUSEBUTTONDOWN and option.text == "Easy" and setAlgorithm =="MINIMAX":
                         chooseMinimax(2)
@@ -400,7 +409,7 @@ def connect4(setAlgorithm):
                         chooseMinimax(4)
                         connect4(setAlgorithm)
                     if event.type == pygame.MOUSEBUTTONDOWN and option.text == "Hard" and setAlgorithm =="ALPHA BETA":
-                        chooseAlphabeta(6)
+                        chooseAlphabeta(5)
                         connect4(setAlgorithm)
                     elif event.type == pygame.MOUSEBUTTONDOWN and option.text == "Hard" and setAlgorithm == "MINIMAX":
                         chooseMinimax(6)
@@ -414,12 +423,11 @@ def connect4(setAlgorithm):
                 option.hovered = False
             option.draw()
 
-        title=text_format("CONNECT 4 AI vs AI ", font, 65, black)
+        title = text_format("", font, 100, black)    
         title_rect=title.get_rect()
-        screen.blit(title, (screenWidth/2 - (title_rect[2]/2), 80))
+        screen.blit(title, (screenWidth/2 - (title_rect[2]/2), 100))
         pygame.display.update()
 
 
 connect4(setAlgorithm)
 pygame.quit()
-QUIT()
